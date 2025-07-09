@@ -17,9 +17,33 @@
     <table class="todo-table">
       <thead>
         <tr>
-          <th>Done</th>
-          <th>Task</th>
-          <th>Created</th>
+          <th
+            @click="todoStore.setSort('done')"
+            :class="{ sortable: true, active: sortBy === 'done' }"
+          >
+            Done
+            <span v-if="sortBy === 'done'">{{
+              todoStore.sortDir === "asc" ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            @click="todoStore.setSort('text')"
+            :class="{ sortable: true, active: sortBy === 'text' }"
+          >
+            Task
+            <span v-if="sortBy === 'text'">{{
+              todoStore.sortDir === "asc" ? "▲" : "▼"
+            }}</span>
+          </th>
+          <th
+            @click="todoStore.setSort('createdAt')"
+            :class="{ sortable: true, active: sortBy === 'createdAt' }"
+          >
+            Created
+            <span v-if="sortBy === 'createdAt'">{{
+              todoStore.sortDir === "asc" ? "▲" : "▼"
+            }}</span>
+          </th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -54,33 +78,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useTodoStore } from "../store/todo";
 import { storeToRefs } from "pinia";
 import SciSureDatePicker from "../components/SciSureDatePicker.vue";
 
 const todoStore = useTodoStore();
-
 const newTodo = ref("");
 const newScheduledAt = ref(null);
-const { todos } = storeToRefs(todoStore);
-
-// Track which column is used for sorting
-const sortBy = ref("createdAt");
-
-const sortedTodos = computed(() => {
-  const arr = Array.isArray(todos.value) ? [...todos.value] : [];
-  return arr.sort((a, b) => {
-    if (sortBy.value === "createdAt") {
-      return a.createdAt.localeCompare(b.createdAt);
-    } else if (sortBy.value === "done") {
-      return a.done === b.done ? 0 : a.done ? 1 : -1;
-    } else if (sortBy.value === "text") {
-      return a.text.localeCompare(b.text);
-    }
-    return 0;
-  });
-});
+const { filteredSortedTodos, todos, sortBy, sortDir } = storeToRefs(todoStore);
 
 const add = () => {
   if (newTodo.value.trim()) {
@@ -89,13 +95,6 @@ const add = () => {
     newScheduledAt.value = null;
   }
 };
-const filteredSortedTodos = computed(() => {
-  const now = new Date();
-  return sortedTodos.value.filter((todo) => {
-    if (!todo.scheduledAt) return true;
-    return new Date(todo.scheduledAt) <= now;
-  });
-});
 const toggle = (id) => todoStore.toggleTodo(id);
 const remove = (id) => todoStore.removeTodo(id);
 </script>

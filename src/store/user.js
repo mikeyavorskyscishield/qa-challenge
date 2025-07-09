@@ -1,21 +1,21 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useUserStore = defineStore('user', () => {
+export const useUserStore = defineStore("user", () => {
   const user = ref(null);
 
   function setUser(newUser) {
     user.value = newUser;
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem("user", JSON.stringify(newUser));
   }
 
   function logout() {
     user.value = null;
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
   }
 
   function loadUser() {
-    const saved = localStorage.getItem('user');
+    const saved = localStorage.getItem("user");
     if (saved) user.value = JSON.parse(saved);
   }
 
