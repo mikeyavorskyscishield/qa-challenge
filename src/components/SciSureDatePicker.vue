@@ -143,7 +143,7 @@ export default {
       // Parse as local date, not UTC, to avoid timezone shifts
       const d =
         typeof date === "string"
-          ? new Date(date + "T00:00:00")
+          ? new Date(date + "T23:59:59")
           : new Date(date);
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, "0");
