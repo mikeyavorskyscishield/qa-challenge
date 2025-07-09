@@ -8,16 +8,18 @@ export const useTodoStore = defineStore("todo", () => {
    * @property {string} text
    * @property {boolean} done
    * @property {string} createdAt
+   * @property {string|null} scheduledAt
    */
   /** @type {import('vue').Ref<Todo[]>} */
   const todos = ref([]);
 
-  function addTodo(text) {
+  function addTodo(text, scheduledAt = null) {
     todos.value.push({
       id: Date.now(),
       text,
       done: false,
       createdAt: new Date().toISOString(),
+      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
     });
   }
 
