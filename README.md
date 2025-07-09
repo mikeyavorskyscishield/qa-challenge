@@ -1,8 +1,9 @@
-# Nuxt To-Do List App with Authentication
+# To-Do List App with Authentication
 
-This project is a Nuxt-compatible Vue to-do list application featuring user authentication.
+This project is a VueJS to-do list application featuring user authentication.
 
 ## Features
+
 - User registration and login
 - Add, edit, and delete to-do items
 - Persistent authentication state
@@ -13,19 +14,20 @@ This project is a Nuxt-compatible Vue to-do list application featuring user auth
    ```sh
    npm install
    ```
-2. Start the development server:
+2. Start the Vite development server and Fastify API server:
    ```sh
-   npm run dev
+   npm run start
    ```
 
 ## Project Structure
+
 - `src/` - Main source code
 - `public/` - Static assets
 
 ## Customization
-- Update authentication logic in the `auth/` module (to be created)
+
 - To-do logic in the `components/` and `pages/` directories
 
 ---
 
-For more details, see the Nuxt and Vue documentation.
+For more details, see the Vue and Fastify documentation.
