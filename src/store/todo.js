@@ -89,7 +89,7 @@ export const useTodoStore = defineStore("todo", () => {
     const now = new Date();
     if (filter.value === "current") {
       return sortedTodos.value.filter(
-        (todo) => !todo.scheduledAt || new Date(todo.scheduledAt) <= now,
+        (todo) => !todo.scheduledAt || new Date(todo.scheduledAt) < now,
       );
     } else if (filter.value === "scheduled") {
       return sortedTodos.value.filter(
