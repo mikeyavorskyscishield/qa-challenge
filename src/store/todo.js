@@ -13,19 +13,43 @@ export const useTodoStore = defineStore("todo", () => {
   /** @type {import('vue').Ref<Todo[]>} */
   const todos = ref([]);
 
-  function addTodo(text, scheduledAt = null) {
-    todos.value.push({
-      id: Date.now(),
-      text,
-      done: false,
-      createdAt: new Date().toISOString(),
-      scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-    });
+  async function fetchTodos(userId) {
+    const res = await fetch(`/api/todos?user_id=${encodeURIComponent(userId)}`);
+    if (!res.ok) throw new Error("Failed to fetch todos");
+    todos.value = await res.json();
   }
 
-  function toggleTodo(id) {
+  async function addTodo(text, scheduledAt = null, userId = null) {
+    if (!userId) throw new Error("User ID required");
+    const res = await fetch("/api/todos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, text, scheduledAt }),
+    });
+    if (!res.ok) throw new Error("Failed to add todo");
+    const todo = await res.json();
+    todos.value.push(todo);
+  }
+
+  // Update todo (done state) via API
+  async function toggleTodo(id) {
     const todo = todos.value.find((t) => t.id === id);
-    if (todo) todo.done = !todo.done;
+    if (!todo) return;
+    const newDone = !todo.done;
+    // Optimistically update UI
+    todo.done = newDone;
+    try {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ done: newDone }),
+      });
+      if (!res.ok) throw new Error("Failed to update todo");
+    } catch (e) {
+      // Rollback UI if API fails
+      todo.done = !newDone;
+      throw e;
+    }
   }
 
   function removeTodo(id) {
@@ -61,14 +85,26 @@ export const useTodoStore = defineStore("todo", () => {
     });
   });
 
-  // Filtered sorted todos (exclude future scheduled)
   const filteredSortedTodos = computed(() => {
     const now = new Date();
-    return sortedTodos.value.filter((todo) => {
-      if (!todo.scheduledAt) return true;
-      return new Date(todo.scheduledAt) <= now;
-    });
+    if (filter.value === "current") {
+      return sortedTodos.value.filter(
+        (todo) => !todo.scheduledAt || new Date(todo.scheduledAt) <= now,
+      );
+    } else if (filter.value === "scheduled") {
+      return sortedTodos.value.filter(
+        (todo) => todo.scheduledAt && new Date(todo.scheduledAt) > now,
+      );
+    }
+    return filteredSortedTodos.value;
   });
+
+  // Filter state
+  const filter = ref("current");
+
+  function setFilter(value) {
+    filter.value = value;
+  }
 
   return {
     todos,
@@ -80,5 +116,8 @@ export const useTodoStore = defineStore("todo", () => {
     setSort,
     sortedTodos,
     filteredSortedTodos,
+    fetchTodos,
+    filter,
+    setFilter,
   };
 });
